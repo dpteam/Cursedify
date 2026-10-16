@@ -15,7 +15,7 @@
 <main class="app">
   <header class="topbar">
     <div class="brand">CURSEDIFY<small>LOCAL MEME MEDIA LAB // v0.1</small></div>
-    <div class="top-actions"><button id="randomBtn">🎲 Случайно</button><button id="resetBtn">↻ Сброс</button><button id="exportBtn" class="primary" disabled>⬇ Скачать результат</button></div>
+    <div class="top-actions"><button id="randomBtn">🎲 Случайно</button><button id="rerollBtn" title="Оставить эффект, но получить другую вариацию">🎰 Реролл</button><button id="resetBtn">↻ Сброс</button><button id="exportBtn" class="primary" disabled>⬇ Скачать результат</button></div>
   </header>
   <div class="grid">
     <section class="panel">
@@ -40,8 +40,8 @@
       <div class="effect-note" id="effectNote">Загрузи файл — я сам покажу подходящие эффекты.</div>
       <div class="effects" id="effects"></div>
       <div class="side-section"><h3>ПРЕСЕТ (не потеряй настройки)</h3><label class="check"><input id="autosave" type="checkbox" checked> Запоминать последний эффект</label><button id="saveBtn">💾 Запомнить</button> <button id="loadBtn">↥ Вернуть</button><p class="hint">Это не сохраняет сам файл. Для результата нажми большую кнопку «Скачать результат».</p></div>
-      <div class="side-section"><h3>audio telemetry</h3><div class="meter"><i id="meter"></i></div><div class="status" style="padding:7px 0 0;border:0"><span id="audioMode">NO SIGNAL</span><span id="fps">IDLE</span></div><label class="check"><input id="spatial" type="checkbox"> HRTF / звук справа</label><p class="hint">«Autotune» — мемный робот, не коррекция нот. Видео скачивается без звука. GIF скачивается как изменённый кадр.</p></div>
-      <div class="side-section"><h3>shortcuts</h3><div class="row"><span class="kbd">1–9</span><span>эффект</span></div><div class="row"><span class="kbd">R</span><span>рандом</span></div><div class="row"><span class="kbd">Space</span><span>play / pause</span></div></div>
+      <div class="side-section"><h3>audio telemetry</h3><div class="meter"><i id="meter"></i></div><div class="status" style="padding:7px 0 0;border:0"><span id="audioMode">NO SIGNAL</span><span id="fps">IDLE</span></div><label class="check"><input id="spatial" type="checkbox"> HRTF / звук справа</label><p class="hint">«Autotune» — мемный робот. Аудио видео захватывается в WebM, если это умеет браузер. GIF скачивается как изменённый кадр.</p></div>
+      <div class="side-section"><h3>shortcuts</h3><div class="row"><span class="kbd">1–9</span><span>эффект</span></div><div class="row"><span class="kbd">R</span><span>reroll вариации</span></div><div class="row"><span class="kbd">Space</span><span>play / pause</span></div></div>
     </aside>
   </div>
   <footer class="footer">Всё локально • исходники не изменяются • превью до 1280 px • аудио до 120 секунд</footer>
@@ -69,20 +69,50 @@
     ['datamosh','🧬','Datamosh lite','пиксели ушли гулять',['image','video','gif']],
     ['invert','👽','Негатив','изнанка матрицы',['image','video','gif','audio']],
     ['poster','📰','Плакат','4 цвета, 0 стыда',['image','video','gif']],
+    ['slowmo','🐌','Slowmo','замедли и растяни время',['video','audio']],
+    ['speedup','🚀','Speedup','ускорь без жалости',['video','audio']],
+    ['chipmunk','🐿','Chipmunk','быстро и пискляво',['video','audio']],
     ['autotune','🎤','Autotune','мемный робот',['audio']],
     ['echo','🏚','Echo chamber','голос из подъезда',['audio']],
     ['bitcrush','🕹','Bitcrush','8-bit уши',['audio']],
     ['nightcore','⚡','Nightcore','слишком бодро',['audio']],
     ['telephone','☎','Телефон 2003','алло, это кринж?',['audio']],
-    ['reverse','⏪','Reverse','обратно в утробу',['audio']]
+    ['reverse','⏪','Reverse','обратно в утробу',['audio']],
+    ['bassboost','🔊','Bass cannon','бас ломает мебель',['audio']],
+    ['subwoofer','💥','Subwoofer','соседи уже знают',['audio']],
+    ['robot','🤖','Robot voice','железный участковый',['audio']],
+    ['megaphone','📣','Megaphone','оралка на районе',['audio']],
+    ['walkie','📻','Walkie-talkie','приём, кринж-база',['audio']],
+    ['vinyl','💿','Vinyl dust','пыль и царапины',['audio']],
+    ['tape','📼','Cassette warp','жвачка в магнитофоне',['audio']],
+    ['chorus','👯','Choir clone','сам себе бэк-вокал',['audio']],
+    ['flanger','🌀','Flanger tunnel','звук в спирали',['audio']],
+    ['reverb','⛪','Cathedral','крик в соборе',['audio']],
+    ['tremolo','🚨','Tremolo siren','пульсация паники',['audio']],
+    ['ringmod','☎','Ring mod','инопланетный звонок',['audio']],
+    ['stutter','🔁','Stutter loop','заело пластинку',['audio']],
+    ['compressor','🗜','Compressor','прижми динамику',['audio']],
+    ['distortion','⚡','Distortion','перегруз в подвале',['audio']],
+    ['underwater','🌊','Underwater','тонем красиво',['audio']],
+    ['horror','👻','Horror drone','страшно, но смешно',['audio']],
+    ['stereo','🎧','Stereo widen','уши на 180°',['audio']],
+    ['phase','🫨','Phase cancel','голос из параллельной',['audio']]
   ];
   const state = {kind:null,file:null,image:null,video:null,url:null,ready:false,version:0,
     effect:'clean',mediaTab:'all',strength:70,seed:42,playing:false,raf:0,busy:false,pending:false,
-    audioCtx:null,buffer:null,processed:null,source:null,analyser:null,nodes:[],offset:0,volume:.8,
+    audioCtx:null,buffer:null,processed:null,source:null,analyser:null,nodes:[],offset:0,volume:.8,gifStarted:0,
     recording:false,recorder:null,exporting:false};
   const clamp = (v,a=0,b=1) => Math.max(a,Math.min(b,v));
   const setStatus = text => { $('#statusText').textContent=text; };
   let frames=0, lastFrame=performance.now(), audioTimer=0;
+  function playbackRate(){
+    const s=state.strength/100;
+    if(state.effect==='slowmo')return 1/(1+.9*s);
+    if(state.effect==='speedup')return 1+.85*s;
+    if(state.effect==='chipmunk')return 1+.6*s;
+    return 1;
+  }
+  function syncPlaybackRate(){if(state.video)state.video.playbackRate=playbackRate();}
 
   const effectFor = (name) => effects.find(e=>e[0]===name);
   const effectType = () => state.kind==='gif'?'gif':state.kind;
@@ -112,18 +142,18 @@
       state.kind==='video'?'⬇ Скачать WebM':state.kind==='audio'?'⬇ Скачать WAV':'⬇ Скачать JPG';
     $('#playBtn').hidden=!state.ready||state.kind==='image';
     $('#playBtn').textContent=state.playing?'⏸ Pause':'▶ Play';
-    ['#fileInput','#strength','#seed','#randomBtn','#resetBtn','#loadBtn','#spatial','#playBtn']
+    ['#fileInput','#strength','#seed','#randomBtn','#rerollBtn','#resetBtn','#loadBtn','#spatial','#playBtn']
       .forEach(id=>$(id).disabled=state.exporting);
     $('#spatial').disabled=state.exporting||state.kind!=='audio';
     const hasTimeline=state.ready&&['video','audio','gif'].includes(state.kind);$('#mediaControls').hidden=!hasTimeline;
     $('#mediaSeek').disabled=state.exporting;$('#volume').disabled=state.exporting||state.kind==='gif';
-    $('#mediaHint').textContent=state.kind==='gif'?'GIF: Play перезапускает анимацию, полоса показывает её прогресс.':state.kind==='audio'?'Аудио: можно прыгать по таймлайну и менять громкость.':'Видео: можно прыгать по таймлайну. В экспорт попадёт изменённая картинка без звука.';
+    $('#mediaHint').textContent=state.kind==='gif'?'GIF: Play запускает анимацию, полоса показывает её прогресс.':state.kind==='audio'?'Аудио: можно прыгать по таймлайну и менять громкость.':'Видео: можно прыгать по таймлайну. Аудио исходника попадёт в WebM, если браузер умеет его захватывать.';
     updateMediaBar();
   }
   function fmtTime(seconds){seconds=Math.max(0,Number(seconds)||0);const m=Math.floor(seconds/60),s=Math.floor(seconds%60);return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;}
   function mediaPosition(){
     if(state.kind==='video'&&state.video)return [state.video.currentTime||0,state.video.duration||0];
-    if(state.kind==='audio'&&state.buffer){let p=state.offset||0;if(state.playing&&state.audioCtx)p+=state.audioCtx.currentTime-(state.started||state.audioCtx.currentTime);return [Math.min(p,state.buffer.duration),state.buffer.duration];}
+    if(state.kind==='audio'&&state.buffer){const audio=state.processed||state.buffer;let p=state.offset||0;if(state.playing&&state.audioCtx)p+=state.audioCtx.currentTime-(state.started||state.audioCtx.currentTime);return [Math.min(p,audio.duration),audio.duration];}
     if(state.kind==='gif'){const p=state.playing?Math.min(5,(performance.now()-(state.gifStarted||performance.now()))/1000):0;return [p,5];}
     return [0,0];
   }
@@ -131,7 +161,7 @@
     const [position,duration]=mediaPosition();$('#mediaSeek').max=Math.max(1,duration);$('#mediaSeek').value=Math.min(position,duration||1);$('#mediaTime').textContent=`${fmtTime(position)} / ${fmtTime(duration)}`;
   }
   function changed(persist=true){
-    state.version++;ui();requestRender();
+    state.version++;syncPlaybackRate();ui();requestRender();
     if(state.kind==='audio'&&state.ready){
       const resume=state.playing;stopAudio(false);clearTimeout(audioTimer);
       audioTimer=setTimeout(()=>{state.processed=processAudio();if(resume)startAudio().catch(fail);requestRender();},80);
@@ -148,6 +178,7 @@
   function clearMedia(){
     state.version++;state.ready=false;clearTimeout(audioTimer);stopAudio(true);
     if(state.video){state.video.pause();state.video.removeAttribute('src');state.video.load();}
+    if(state.image?.close)state.image.close();
     if(state.url)URL.revokeObjectURL(state.url);
     Object.assign(state,{kind:null,image:null,video:null,url:null,buffer:null,processed:null,offset:0,playing:false,file:null,mediaTab:'all',exported:false,gifStarted:0});
     $('#meter').style.width='0%';$('#audioMode').textContent='NO SIGNAL';$('#fps').textContent='IDLE';ui();
@@ -162,18 +193,30 @@
       const ext=file.name.split('.').pop().toLowerCase();
       if(file.type.startsWith('image/')||/^(png|jpe?g|gif|webp|avif|bmp|svg)$/.test(ext)){
         state.kind=ext==='gif'?'gif':'image';state.mediaTab=state.kind;state.url=URL.createObjectURL(file);
-        const image=new Image();state.image=image;
-        await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(Error('изображение не декодируется'));image.src=state.url;});
+        let image;
+        if(state.kind==='gif'){
+          image=new Image();
+          await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(Error('GIF не декодируется'));image.src=state.url;});
+        }else if(window.createImageBitmap){
+          try{image=await createImageBitmap(file,{imageOrientation:'from-image'});}catch(error){
+            image=new Image();await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(Error('изображение не декодируется'));image.src=state.url;});
+          }
+        }else{
+          image=new Image();await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(Error('изображение не декодируется'));image.src=state.url;});
+        }
+        state.image=image;
         if(version!==state.version)return;
-        if(!image.naturalWidth||image.naturalWidth*image.naturalHeight>40000000)throw Error('лимит изображения — 40 MP');
+        const iw=image.naturalWidth||image.width,ih=image.naturalHeight||image.height;
+        if(!iw||!ih)throw Error('изображение имеет нулевой размер');
+        if(iw*ih>40000000)throw Error('лимит изображения — 40 MP');
       }else if(file.type.startsWith('video/')||/^(mp4|webm|mov|m4v|ogv)$/.test(ext)){
         state.kind='video';state.url=URL.createObjectURL(file);
         const video=document.createElement('video');state.video=video;
-        video.muted=true;video.playsInline=true;video.preload='auto';
-        await new Promise((resolve,reject)=>{video.onloadeddata=resolve;video.onerror=()=>reject(Error('видеокодек не поддерживается'));video.src=state.url;video.load();});
+        video.muted=false;video.volume=state.volume;video.playsInline=true;video.preload='metadata';
+        await new Promise((resolve,reject)=>{video.onloadedmetadata=resolve;video.onerror=()=>reject(Error('видеокодек или контейнер не поддерживается этим браузером'));video.src=state.url;video.load();});
         if(version!==state.version)return;
         if(!Number.isFinite(video.duration)||video.duration>300)throw Error('видео: лимит 5 минут');
-        video.onplay=()=>{state.playing=true;ui();requestRender();};
+        video.onplay=()=>{syncPlaybackRate();state.playing=true;ui();requestRender();};
         video.onpause=video.onended=()=>{state.playing=false;ui();requestRender();};
         video.onseeked=requestRender;video.ontimeupdate=()=>{updateMediaBar();if(state.playing)requestRender();};
       }else if(file.type.startsWith('audio/')||/^(wav|mp3|ogg|oga|flac|m4a|aac|opus)$/.test(ext)){
@@ -187,9 +230,11 @@
       if(version!==state.version)return;
       if(state.kind!=='audio'&&state.effect==='autotune')state.effect='clean';
       if(!effectFor(state.effect)[4].includes(effectType()))state.effect='clean';
-      state.ready=true;state.exported=false;ui();requestRender();
-      setStatus(state.kind==='video'?'VIDEO // превью и экспорт без звука':
-        ext==='gif'?'GIF // статичный кадр → JPG':state.kind.toUpperCase()+' // ready');
+      state.ready=true;state.exported=false;syncPlaybackRate();
+      if(state.kind==='gif'){state.gifStarted=performance.now();state.playing=true;}
+      ui();requestRender();
+      setStatus(state.kind==='video'?'VIDEO // превью с аудио, экспорт WebM с аудио если доступно':
+        ext==='gif'?'GIF // анимация запущена, экспорт кадра → JPG':state.kind.toUpperCase()+' // ready');
     }catch(error){if(version===state.version){clearMedia();fail(error);}}
   }
 
@@ -205,13 +250,13 @@
       state.busy=false;frames++;const now=performance.now();
       if(now-lastFrame>1000){$('#fps').textContent=state.playing?Math.round(frames*1000/(now-lastFrame))+' FPS':'STATIC';frames=0;lastFrame=now;}
       updateMediaBar();
-      if(state.kind==='gif'&&state.playing&&mediaPosition()[0]>=5){state.playing=false;ui();}
+      if(state.kind==='gif'&&state.playing&&mediaPosition()[0]>=5){state.gifStarted=performance.now();state.image.src=state.url+'#loop-'+Date.now();}
       if(state.pending||state.playing)requestRender();
     }
   }
   async function drawImage(){
     const source=state.kind==='video'?state.video:state.image;
-    const sw=source.naturalWidth||source.videoWidth,sh=source.naturalHeight||source.videoHeight;
+    const sw=source.naturalWidth||source.videoWidth||source.width,sh=source.naturalHeight||source.videoHeight||source.height;
     if(!sw||!sh)return;
     const scale=Math.min(1,1280/Math.max(sw,sh));
     const w=Math.max(1,Math.round(sw*scale)),h=Math.max(1,Math.round(sh*scale));
@@ -256,7 +301,7 @@
       scratch.width=w;scratch.height=h;q.drawImage(canvas,0,0);ctx.save();ctx.translate(w/2,h/2);ctx.globalAlpha=.9;for(let i=0;i<4;i++){ctx.save();ctx.rotate(i*Math.PI/2);ctx.scale(i%2?-1:1,1);ctx.drawImage(scratch,-w/2,-h/2,w,h);ctx.restore();}ctx.restore();
     }
     if(e==='vhs'){
-      ctx.globalAlpha=.2+.25*s;ctx.fillStyle='#59ffff';for(let y=0;y<h;y+=Math.max(3,Math.round(12-8*s)))ctx.fillRect(0,y,w,1);ctx.fillStyle='#ff3864';ctx.fillRect(0,Math.floor(h*(.2+.6*Math.random())),w,Math.max(1,h*.008));ctx.globalAlpha=1;
+      const noise=random(state.seed+Math.floor((state.video?.currentTime||0)*12));ctx.globalAlpha=.2+.25*s;ctx.fillStyle='#59ffff';for(let y=0;y<h;y+=Math.max(3,Math.round(12-8*s)))ctx.fillRect(0,y,w,1);ctx.fillStyle='#ff3864';ctx.fillRect(0,Math.floor(h*(.2+.6*noise())),w,Math.max(1,h*.008));ctx.globalAlpha=1;
       ctx.fillStyle='#d0ffc5';ctx.font=`${Math.max(12,w/36)}px monospace`;ctx.fillText('PLAY ▷  REC  1997',12,h-15);
     }
     if(e==='datamosh'){
@@ -286,30 +331,50 @@
     const b=state.buffer;if(!b)return null;
     const rate=b.sampleRate,e=state.effect,s=state.strength/100;
     if(e==='clean'||s===0)return b;
-    const out=audioContext().createBuffer(Math.min(2,b.numberOfChannels),b.length,rate);
+    const playback=playbackRate(),maxSamples=rate*180;
+    const outLength=Math.max(1,Math.min(maxSamples,Math.round(b.length/playback)));
+    const channels=e==='stereo'?Math.max(2,Math.min(2,b.numberOfChannels)):Math.min(2,b.numberOfChannels);
+    const out=audioContext().createBuffer(channels,outLength,rate);
     const hold=1+Math.round(s*(e==='pixel'?90:24)),steps=2**Math.max(2,Math.round(16-13*s));
     const robotHz=110*2**(Math.round(state.seed/100*12)/12);
     for(let c=0;c<out.numberOfChannels;c++){
-      const input=b.getChannelData(c),d=out.getChannelData(c);let smooth=0;
+      const input=b.getChannelData(Math.min(c,b.numberOfChannels-1)),d=out.getChannelData(c);let smooth=0,bass=0,previous=0;
       const rng=random(state.seed),block=Math.max(1,Math.round(rate*.06));
       let shift=0;
       for(let i=0;i<d.length;i++){
-        let x=input[i];
-        if(e==='shakal'||e==='lowbit'||e==='pixel')x=Math.round(input[i-i%hold]*steps)/steps;
+        const samplePos=Math.min(input.length-1,i*playback),inputIndex=Math.floor(samplePos),frac=samplePos-inputIndex;
+        const sample=input[inputIndex]*(1-frac)+(input[Math.min(input.length-1,inputIndex+1)]||0)*frac;
+        let x=sample;
+        if(e==='shakal'||e==='lowbit'||e==='pixel'||e==='bitcrush')x=Math.round(input[Math.max(0,inputIndex-inputIndex%hold)]*steps)/steps;
         if(e==='deepfry')x=Math.tanh(x*(1+18*s))*.85;
         if(e==='cooked'){smooth+=(x-smooth)*(.5-.47*s);x=Math.tanh(smooth*(1+10*s))*.8;}
-        if(e==='zhmykh')x=input[Math.min(input.length-1,Math.floor(i*(1-.65*s)))];
+        if(e==='zhmykh')x=input[Math.min(input.length-1,Math.floor(samplePos*(1-.65*s)))];
         if(e==='glitch'){
           if(i%block===0)shift=rng()<s*.7?Math.floor((rng()-.5)*rate*.2):0;
-          x=input[clamp(i+shift,0,input.length-1)];
+          x=input[clamp(inputIndex+shift,0,input.length-1)];
         }
         if(e==='autotune')x=x*(1-s)+Math.tanh(x*(1+7*s))*Math.sin(2*Math.PI*robotHz*i/rate)*s;
         if(e==='invert')x=-x;
-        if(e==='bitcrush'){const q=8+Math.round(48*(1-s));x=Math.round(x*q)/q;}
         if(e==='nightcore'){const tremolo=.75+.25*Math.sin(2*Math.PI*7*i/rate);x=clamp(x*1.35*tremolo,-1,1);}
         if(e==='telephone')x=Math.tanh(x*(2+8*s))*.7;
-        if(e==='echo'){const delay=Math.max(1,Math.round(rate*(.18+.25*s)));x=clamp(x+(i>=delay?input[i-delay]*(.35+.3*s):0),-1,1);}
-        if(e==='reverse')x=input[input.length-1-i];
+        if(e==='echo'||e==='reverb'){const delay=Math.max(1,Math.round(rate*(e==='echo'?.18:.09+.16*s)));x=clamp(x+(inputIndex>=delay?input[inputIndex-delay]*(e==='echo'?.45:.3)*s:0),-1,1);}
+        if(e==='reverse')x=input[input.length-1-inputIndex];
+        if(e==='bassboost'||e==='subwoofer'){bass+=(x-bass)*.012;x=clamp(x+bass*(e==='subwoofer'?2.8:1.7)*s,-1,1);}
+        if(e==='robot'||e==='ringmod')x*=Math.sin(2*Math.PI*(e==='robot'?robotHz:55+state.seed*2)*i/rate);
+        if(e==='megaphone'){previous+=(x-previous)*.16;x=Math.tanh((x-previous*.65)*(2+7*s))*.8;}
+        if(e==='walkie'){previous+=(x-previous)*.12;x=Math.tanh((x-previous)*(.5+1.5*s)*2.4);}
+        if(e==='compressor'){const threshold=.35-.2*s;const gain=Math.abs(x)>threshold?threshold+(Math.abs(x)-threshold)*(.25-.18*s):Math.abs(x);x=Math.sign(x)*gain;}
+        if(e==='distortion')x=Math.tanh(x*(2+24*s))*.82;
+        if(e==='underwater'){bass+=(x-bass)*.018;x=bass*(1-.25*s)+x*.12;}
+        if(e==='horror')x=clamp(x*.55+Math.sin(2*Math.PI*(38+state.seed)*i/rate)*.16*s,-1,1);
+        if(e==='tremolo')x*=.35+.65*(.5+.5*Math.sin(2*Math.PI*(3+8*s)*i/rate));
+        if(e==='stutter'){const period=Math.max(1,Math.round(rate*(.045+.12*(1-s))));x=input[Math.min(input.length-1,inputIndex-inputIndex%period)];}
+        if(e==='chorus'){const delay=Math.max(1,Math.round(rate*(.012+.018*s)));const mod=Math.floor(Math.sin(i/(rate*.19))*rate*.006*s);x=(x+input[Math.max(0,inputIndex-delay+mod)]*.65)/1.65;}
+        if(e==='flanger'){const delay=Math.max(1,Math.round(rate*(.002+.012*s)));const mod=Math.floor((.5+.5*Math.sin(i/(rate*.7)))*rate*.008*s);x=(x+input[Math.max(0,inputIndex-delay-mod)]*.7)/1.7;}
+        if(e==='vinyl'||e==='tape'){const noise=(rng()-.5)*.08*s;x=clamp(x+noise,-1,1);if(rng()<.0007*s)x*=.1;}
+        if(e==='tape')x=Math.tanh(x*(1+.8*s))+Math.sin(i/(rate*.31))*x*.035*s;
+        if(e==='stereo'&&out.numberOfChannels===2)x=c===0?x*(1+.35*s):x*(1-.35*s);
+        if(e==='phase'&&c%2)x=-x;
         d[i]=clamp(x,-1,1);
       }
     }
@@ -399,7 +464,7 @@
     state.exporting=true;ui();setStatus('EXPORT // обработка');
     const name=(state.file.name.replace(/\.[^.]+$/,'')||'cursed')+'-'+state.effect;
     try{
-      if(state.kind==='image'){
+      if(state.kind==='image'||state.kind==='gif'){
         // Wait for the frame pump (JPEG decoding included) before saving the visible frame.
         await new Promise(resolve=>{const wait=()=>state.busy||state.raf?setTimeout(wait,20):resolve();wait();});
         const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',state.effect==='shakal'?Math.max(0,1-state.strength/100):.92));
@@ -421,10 +486,13 @@
     const mime=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'].find(t=>MediaRecorder.isTypeSupported(t));
     if(!mime)throw Error('запись WebM не поддерживается');
     const v=state.video,previous=v.currentTime,wasPlaying=!v.paused;v.pause();
-    let stream,rec;
+    let stream,videoStream,rec;
     try{
       if(v.currentTime!==0){v.currentTime=0;await new Promise(resolve=>v.addEventListener('seeked',resolve,{once:true}));}
-      stream=canvas.captureStream(30);rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:state.effect==='lowbit'?100000:2000000});
+      syncPlaybackRate();v.volume=state.volume;v.muted=false;
+      stream=canvas.captureStream(30);
+      if(v.captureStream){videoStream=v.captureStream();for(const track of videoStream.getAudioTracks())stream.addTrack(track);}
+      rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:state.effect==='lowbit'?100000:2000000});
       const chunks=[];
       const done=new Promise((resolve,reject)=>{
         rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data);};rec.onstop=resolve;rec.onerror=()=>reject(Error('ошибка видеозаписи'));
@@ -435,7 +503,7 @@
       finally{v.removeEventListener('ended',ended);}
     }finally{
       v.pause();if(rec&&rec.state!=='inactive')rec.stop();stream?.getTracks().forEach(t=>t.stop());
-      v.currentTime=previous;if(wasPlaying)v.play().catch(fail);requestRender();
+      v.currentTime=previous;syncPlaybackRate();if(wasPlaying)v.play().catch(fail);requestRender();
     }
   }
   function wavBlob(buf){
@@ -467,11 +535,12 @@
     const choices=effects.filter(e=>e[0]!=='clean'&&e[4].includes(state.mediaTab)&&(!state.kind||e[4].includes(effectType())));
     const pick=choices[Math.floor(Math.random()*Math.max(1,choices.length))]||effects[0];state.effect=pick[0];state.strength=20+Math.floor(Math.random()*81);state.seed=Math.floor(Math.random()*101);changed();
   };
+  $('#rerollBtn').onclick=()=>{state.seed=Math.floor(Math.random()*101);changed();setStatus(`REROLL // ${effectFor(state.effect)?.[2]||'вариант'} #${state.seed}`);};
   $('#resetBtn').onclick=()=>{Object.assign(state,{effect:'clean',strength:70,seed:42});$('#spatial').checked=false;changed();};
   document.addEventListener('keydown',e=>{
     if(state.exporting||e.repeat||e.ctrlKey||e.metaKey||e.altKey||e.target.matches('input,textarea,select,[contenteditable]'))return;
     if(e.code==='Space'&&!e.target.closest('button,label')){e.preventDefault();togglePlay();}
-    if(e.key.toLowerCase()==='r')$('#randomBtn').click();
+    if(e.key.toLowerCase()==='r')$('#rerollBtn').click();
     if(/^[1-9]$/.test(e.key)){const visible=[...document.querySelectorAll('.effect:not([hidden])')];visible[+e.key-1]?.click();}
   });
   // No permanent gamepad polling when no controller is connected.
