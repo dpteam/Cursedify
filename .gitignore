@@ -1,0 +1,14 @@
+# Reference scripts and source material are intentionally kept out of Git.
+refs/
+
+# Local/editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Temporary and generated files
+*.tmp
+*.log
+dist/
+build/
